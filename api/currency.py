@@ -24,15 +24,13 @@ async def get_currency(selected_currency):
     response = requests.get(url)
     return response.json()
 
-# async def get_currency(currency: Optional[str] = "USD", max_length=3):
-#     try:
-
-#         url = f'https://api.coinbase.com/v2/prices/spot?currency={currency}'
-#         response = requests.get(url)
-
-#         if currency not in currency_list:
-#             raise HTTPException(status_code=404, detail="Invalid currency")
-#         return response.json()
-#     except requests.exceptions.RequestException:
-#         raise HTTPException(status_code=500, detail="Error connecting, retry later")
+@app.get("/health")
+async def get_health():
+    API_ENDPOINT = "http://127.0.0.1:8000"
+    response = requests.get('http://64.225.84.48')
+    #response = urllib.request.urlopen(API_ENDPOINT)
+    if response.status_code == 200:
+        return {"health":"ok"}
+    else:
+        return {"health": "API is not Healthy"}
 
