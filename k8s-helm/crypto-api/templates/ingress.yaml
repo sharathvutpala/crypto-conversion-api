@@ -11,10 +11,10 @@ metadata:
 spec:
   tls:
   - hosts:
-    - crypto-api-demo.sharath.tech
+    - {{ .Values.ingress.host }}
     secretName: ssl-cert-secret
   rules:
-  - host: crypto-api-demo.sharath.tech
+  - host: {{ .Values.ingress.host }}
     http:
       paths:
       - backend:
