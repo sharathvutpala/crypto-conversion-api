@@ -15,7 +15,8 @@ RUN set -eux \
     && pip install --upgrade pip setuptools wheel \
     && pip install -r /code/requirements.txt
 # copy project
-COPY . /code/
+COPY api/ /code/api
+COPY tests/ /code/tests
 
 EXPOSE 8000
 
