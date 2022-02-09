@@ -21,9 +21,12 @@ def home():
 @app.get("/currency/{selected_currency}")
 
 async def get_currency(selected_currency: Optional[str] = "INR", max_length=3):
+    if len(selected_currency) !=3:
+        return {"details": "Currency length must be 3 Characters"}
 
-    if selected_currency.upper() not in currency_list:
+    elif selected_currency.upper() not in currency_list and len(selected_currency) ==3:
         return {"details": "Currency Details Not Found"}
+    
     else:
         url = f'https://api.coinbase.com/v2/prices/spot?currency={selected_currency}'
         response = requests.get(url)

@@ -7,9 +7,7 @@ from api.currency  import app
 client = TestClient(app)
 
 def test_curency():
-    response = client.get("/currency/USD")
-#    error_keyword = str(response["errors"][0]['id'])
-#    assert "invalid_request" not in error_keyword
-    assert response.json() != {"errors":[{"id":"invalid_request","message":"Currency is invalid"}]} 
-    assert response.json() != {"errors":[{"id":"not_found","message":"Invalid currency"}]}
+    response = client.get("/currency/ab")
+    assert response.json() != {"details":"Currency Details Not Found"}
+    assert response.json() != {"details": "Currency length must be 3 Characters"} 
     assert response.status_code != 404
