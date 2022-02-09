@@ -41,7 +41,7 @@ export KUBECONFIG=kubeconfig_crypto-api-eks
 2. Running aws eks subcommand
 
 ```
-aws eks update-kubeconfig --region <us-east-2> --name crypto-api-eks
+aws eks update-kubeconfig --region us-east-2 --name crypto-api-eks
 ```
 
 ## Helm Chart
