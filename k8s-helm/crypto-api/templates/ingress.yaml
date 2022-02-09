@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations: 
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    kubernetes.io/ingress.class: nginx
+  name: crypto-api-ingress
+  labels:
+    {{- include "crypto-api.labels" . | nindent 4 }}
+
+spec:
+  tls:
+  - hosts:
+    - crypto-api-demo.sharath.tech
+    secretName: ssl-cert-secret
+  rules:
+  - host: crypto-api-demo.sharath.tech
+    http:
+      paths:
+      - backend:
+          serviceName: {{ include "crypto-api.fullname" . }}
+          servicePort: 8000
