@@ -1,52 +1,28 @@
-on:
-  push:
-    branches:
-      - main
-
-
-name: Build and Push to AWS ECR
-
-env:
-  AWS_DEFAULT_REGION: us-east-2
-  AWS_DEFAULT_OUTPUT: json
-  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  BUILD_IMAGE: crypto-api-conversion-demo:${{ github.sha }}
+name: Build
+on: push
 
 jobs:
-  build-and-push-to-ecr:
-    name: Build and Push to AWS ECR
-    runs-on: ubuntu-latest
+  build:
+    runs-on: 'ubuntu-latest'
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v1
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-region: us-east-2
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Configure AWS credentials for EKS deployment
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
     
-    - name: ECR Login
-      uses: aws-actions/amazon-ecr-login@v1
-      id: login-aws-ecr
-    
-    - name: Build Image
-      env: 
-        IMAGE_TAG: ${{ github.sha }}
-      
-      run: |
-        docker build -t $BUILD_IMAGE:$IMAGE_TAG .
-      
-    - name: Tag Image
-      env: 
-        ECR_REPO: crypto-api-conversion-demo
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        docker tag $BUILD_IMAGE:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
-    
-    - name: Push the Image
-      run: |
-        docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+      - name: ECR Login
+        uses: aws-actions/amazon-ecr-login@v1
+        id: login-ecr
 
+      - name: Build, tag, and push image to Amazon ECR
+        env: 
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: crypto-api-conversion-demo
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
