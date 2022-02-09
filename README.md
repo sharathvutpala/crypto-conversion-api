@@ -30,7 +30,19 @@ terraform plan
 terraform apply 
 ```
 
-This will generate a Kubeconfig file in the current directory, that is eks-infra. 
+This will generate a Kubeconfig file in the current directory, that is eks-infra. To access the cluster, we have to configure the kubectl to read from the newly generated config. This can be done in two ways:
+
+1. Export Kubeconfig generated after terrafrom apply - 
+
+```
+export KUBECONFIG=kubeconfig_crypto-api-eks
+```
+
+2. Running aws eks subcommand
+
+```
+aws eks update-kubeconfig --region <us-east-2> --name crypto-api-eks
+```
 
 ## Helm Chart
 
@@ -54,6 +66,8 @@ There are 3 workflows available in the repo.
   - Installs Cert-Manager helm chart separately ( Cert Manager cannot be installed as a sub chart due to some limitations)
   - Installs application helm chart which runs our webservice
 
+NOTE: **Running deployment workflow will output address of the Nginx Ingress Controller, which need to be mapped to the host mentioned in the ingress configuration. **
+
 ### API  && Endpoints
 
 Currently API can be accessible at https://crypto-api-demo.sharath.tech. This domain is mapped to load balancer created for Nginx Ingress Controller. It supports two endpoints. 
@@ -61,4 +75,11 @@ Currently API can be accessible at https://crypto-api-demo.sharath.tech. This do
 This endpoint support only these Currencies: [ USD, EUR, RUB, CAD, PHP, DKK]
 
 - /health - This returns the health of the API, Status code 200 when API is healthy
+
+
+### Future Scope
+
+- A /metrics endpoint can be added to report health or metrics
+- Integrating slack messaging in the application 
+- More test cases
 
