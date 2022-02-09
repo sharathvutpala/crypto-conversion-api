@@ -1,0 +1,47 @@
+name: Deploy
+on: push
+
+jobs:
+  deployment:
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Configure AWS credentials for EKS deployment
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+
+      - name: Setup kubeconfig
+        id: setup-kubeconfig
+        run: |
+          aws eks --region us-east-2 update-kubeconfig --name crypto-api-eks
+      
+      - name: Copy kubectl config to output for helm deploy
+        id: kube
+        run: |
+          CONFIG="$(cat ${HOME}/.kube/config)"
+          CONFIG="${CONFIG//'%'/'%25'}"
+          CONFIG="${CONFIG//$'\n'/'%0A'}"
+          CONFIG="${CONFIG//$'\r'/'%0D'}"
+          echo "::set-output name=config::$CONFIG"
+      
+      - name: print output 
+        run: |
+          cat ${HOME}/.kube/config
+      
+      - name: Get Image value for deployment
+        id: get-image
+        env:
+          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          ECR_REPOSITORY: crypto-api-conversion-demo
+        run: |
+          echo "::set-output name=image::${{ ECR_REGISTRY }}/${{ ECR_REPOSITORY }}"
+      
+      - name: Deploy
+        uses: sharathvutpala/github-action-helm3@master
+        with:
+          exec: helm dependency update ./k8s-helm/crypto-api && helm repo add jetstack https://charts.jetstack.io && helm repo update && helm install cert-manager jetstack/cert-manager --set installCRDs=true && helm upgrade crypto-api ./k8s-helm/crypto-api/ --install --wait --atomic --namespace=default --set image.repository=${{ steps.get-image.outputs.image }} --set image.tag=${{ github.sha}} --values=./k8s-helm/crypto-api/values.yaml 
+          kubeconfig: '${{ steps.kube.outputs.config }}'
