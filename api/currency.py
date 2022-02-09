@@ -1,3 +1,5 @@
+import json
+from urllib import response
 from fastapi import FastAPI, HTTPException, Request
 import requests
 from typing import Optional
@@ -20,21 +22,17 @@ def home():
 
 async def get_currency(selected_currency: Optional[str] = "INR", max_length=3):
 
-    try:
-        if selected_currency not in currency_list:
-            raise HTTPException(status_code=404, detail="Not currency")
-        else:
-            url = f'https://api.coinbase.com/v2/prices/spot?currency={selected_currency}'
-            response = requests.get(url)
-            data= response.json()
-            return data
-    except:
-        return "Can't connect to the API"
+    if selected_currency.upper() not in currency_list:
+        return {"details": "Currency Details Not Found"}
+    else:
+        url = f'https://api.coinbase.com/v2/prices/spot?currency={selected_currency}'
+        response = requests.get(url)
+        data= response.json()
+        return data
 
 @app.get("/health")
 async def get_health():
-    API_ENDPOINT = "http://127.0.0.1:8000"
-    response = requests.get('http://64.225.84.48')
+    response = requests.get('https://crypto-api-demo.sharath.tech/')
     if response.status_code == 200:
         return {"health":"ok"}
     else:
