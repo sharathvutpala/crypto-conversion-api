@@ -7,7 +7,7 @@ from api.currency  import app
 client = TestClient(app)
 
 def test_curency():
-    response = client.get("/currency")
+    response = client.get("/currency/USD")
 #    error_keyword = str(response["errors"][0]['id'])
 #    assert "invalid_request" not in error_keyword
     assert response.json() != {"errors":[{"id":"invalid_request","message":"Currency is invalid"}]} 
