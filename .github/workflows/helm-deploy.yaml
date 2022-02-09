@@ -35,10 +35,10 @@ jobs:
       - name: Get Image value for deployment
         id: get-image
         env:
-          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          ECR_REGISTRY_ENDPOINT: ${{ secrets.ECR_REGISTRY }}
           ECR_REPOSITORY: crypto-api-conversion-demo
         run: |
-          echo "::set-output name=image::${{ ECR_REGISTRY }}/${{ ECR_REPOSITORY }}"
+          echo "::set-output name=image::${{ ECR_REGISTRY_ENDPOINT }}/${{ ECR_REPOSITORY }}"
       
       - name: Deploy
         uses: sharathvutpala/github-action-helm3@master
